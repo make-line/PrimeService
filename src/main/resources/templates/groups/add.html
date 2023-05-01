@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Group</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+        crossorigin="anonymous">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">My App</a>
+  </div>
+</nav>
+
+<div class="container mt-3">
+  <h1>Create Group</h1>
+
+  <form th:action="@{/groups/add/{parentId}(parentId=${parentId})}"  th:object="${groupDto}" method="post">
+    <div class="mb-3">
+      <label for="name" class="form-label">Name</label>
+      <input type="text" class="form-control" id="name" th:field="*{name}">
+    </div>
+
+    <div class="mb-3">
+      <label for="definition" class="form-label">Definition</label>
+      <textarea class="form-control" id="definition" rows="3" th:field="*{definition}"></textarea>
+    </div>
+
+    <div class="mb-3 form-check">
+      <input type="checkbox" class="form-check-input" id="isAdminAddsOnly" th:field="*{isAdminAddsOnly}">
+      <label class="form-check-label" for="isAdminAddsOnly">Only Admin Can Add Users</label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+  </form>
+</div>
+
+<script th:src="@{/webjars/jquery/3.6.0/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

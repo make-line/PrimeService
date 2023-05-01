@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:bootstrap="http://www.thymeleaf.org/thymeleaf-extras-bootstrap5"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.thymeleaf.org/thymeleaf-extras-bootstrap5 ">
+<head>
+  <title>My Groups</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+</head>
+<body>
+<div class="container">
+  <div class="row mt-3">
+    <div class="col-md-6">
+      <h1>My Groups</h1>
+    </div>
+    <div class="col-md-6 text-end">
+      <a th:href="@{/groups/add}" class="btn btn-primary">Create Group</a>
+    </div>
+  </div>
+  <div class="row mt-3">
+    <div class="col-md-12">
+      <table class="table table-striped">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Definition</th>
+          <th>Users</th>
+          <th>Subs</th>
+          <th>Actions</th>
+          <th>Admin</th>
+          <th>Parent Group</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="group : ${groups}">
+          <td th:text="${group.name}"></td>
+          <td th:text="${group.definition}"></td>
+          <td>
+            <table class="table">
+              <thead>
+              <tr>
+                <th>Users</th>
+                <th>Action</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="user : ${group.users}">
+                <td th:text="${user.firstName + ' ' + user.lastName}"></td>
+                <td th:if="${group.admin.id == currentUserId and user.id != currentUserId}">
+                  <form method="post" th:action="@{/groups/{groupId}/deleteUserRec/{id}(groupId=${group.id}, id=${user.id})}" >
+                    <input type="submit" value="delete" class="btn btn-danger"/>
+                  </form>
+                </td>
+              </tr>
+              <tr th:if="${group.admin.id == currentUserId}">
+<!--                <td>-->
+<!--                  <input type="text" class="form-control" id="username" placeholder="Username">-->
+<!--                </td>-->
+<!--                <td>-->
+<!--                  <button type="button" class="btn btn-sm btn-success" id="addUserBtn" th:data-group-id="${group.id}">Add</button>-->
+<!--                </td>-->
+                <td>
+                  <form method="post" th:action="@{/groups/{groupId}/addUserRec(groupId=${group.id})}" th:object="${usernameForm}" >
+                    <input type="text" class="form-control" id="username1" placeholder="Username" th:field="*{username}">
+                    <input type="submit" value="Add" class="btn btn-success"/>
+                  </form>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </td>
+
+          <td>
+            <table class="table">
+              <thead>
+              <tr>
+                <th>Users</th>
+                <th>Action</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="user : ${group.subs}">
+                <td th:text="${user.firstName + ' ' + user.lastName}"></td>
+                <td th:if="${group.admin.id == currentUserId}">
+                  <form method="post" th:action="@{/groups/{groupId}/deleteUser/{id}(groupId=${group.id}, id=${user.id})}" >
+                    <input type="submit" value="delete" class="btn btn-danger"/>
+                  </form>
+                </td>
+              </tr>
+              <tr th:if="${group.admin.id == currentUserId}">
+                <td>
+                  <form method="post" th:action="@{/groups/{groupId}/addUser(groupId=${group.id})}" th:object="${usernameForm}" >
+                    <input type="text" class="form-control" id="username" placeholder="Username" th:field="*{username}">
+                    <input type="submit" value="Add" class="btn btn-success"/>
+                  </form>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </td>
+          <td>
+            <table class="table">
+              <tbody>
+              <tr>
+                <td>
+                  <button type="button" class="btn btn-danger" th:if="${group.admin.id == currentUserId}">
+                    Delete Group
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <a  th:href="@{/groups/{id}/leave(id=${group.id})}" th:if="${group.admin.id != currentUserId}" class="btn btn-danger">leave/unsub</a>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                    <a  th:href="@{/groups/add/{id}(id=${group.id})}" th:if="${group.admin.id == currentUserId}" class="btn btn-success">Create Child Group</a>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </td>
+          <td th:text="${group.admin.corpEmail + ', NAME = ' + group.admin.firstName + ' ' + group.admin.lastName}"></td>
+          <td th:if="${group.parentUserGroup != null}" th:text="${'ID = ' + group.parentUserGroup.id + ' , NAME = ' + group.parentUserGroup.name}"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script th:src="@{/webjars/jquery/3.6.0/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>
+
+<script>
+  $(function() {
+    $('form').submit(function(event) {
+      event.preventDefault(); // отменяем стандартное поведение формы
+      var form = $(this);
+      var url = form.attr('action');
+      $.ajax({
+        type: "POST",
+        url: url,
+        data: form.serialize(),
+        success: function(data, textStatus, xhr) {
+          if (xhr.status === 200) { // операция выполнена успешно
+            location.reload(); // обновляем страницу
+          }
+        },
+        error: function(xhr, textStatus, errorThrown) {
+          if (xhr.status === 400) { // пользователь не найден
+            alert("Пользователь не найден в базе данных");
+          } else {
+            alert("Ошибка: " + errorThrown);
+          }
+        }
+      });
+    });
+  });
+</script>
