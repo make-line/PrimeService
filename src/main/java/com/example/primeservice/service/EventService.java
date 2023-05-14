@@ -62,19 +62,46 @@ public class EventService {
         event.setCreator(userService.getCurrentUsername());
         event.setGroups(groupService.getAllGroupsByNames(eventDto.getGroupNames()));
         System.out.println(event);
-        List<EventUser> eventUsers = new ArrayList<>();
+        Set<EventUser> eventUsers = new HashSet<>();
+        LocalDateTime time = LocalDateTime.now();
         for (User user : userService.getAllUsersByNames(eventDto.getUserNames())) {
-            System.out.println(user.getCorpEmail());
             EventUser eventUser = new EventUser();
             eventUser.setNotifyStrategy(notifyStrategyRepository.findById(eventDto.getNotificationStrategyId()).orElseThrow());
             eventUser.setNextStage(Stage.CREATE);
             eventUser.setUser(user);
             eventUser.setEvent(event);
             eventUser.setNotifyStrategy(notifyStrategyRepository.findById(1L).get());
-            eventUser.setNextNotify(LocalDateTime.now());
+            eventUser.setNextNotify(time);
             event.getEventUsers().add(eventUser);
             eventUsers.add(eventUser);
         }
+        for (UserGroup group: event.getGroups()){
+            for(UserGroup subGroup: groupService.getAllSlaveGroups(group)){
+                for (User user: subGroup.getUsers()){
+                    EventUser eventUser = new EventUser();
+                    eventUser.setNotifyStrategy(notifyStrategyRepository.findById(eventDto.getNotificationStrategyId()).orElseThrow());
+                    eventUser.setNextStage(Stage.CREATE);
+                    eventUser.setUser(user);
+                    eventUser.setEvent(event);
+                    eventUser.setNotifyStrategy(notifyStrategyRepository.findById(1L).get());
+                    eventUser.setNextNotify(time);
+                    event.getEventUsers().add(eventUser);
+                    eventUsers.add(eventUser);
+                }
+            }
+            for (User user: group.getUsers()){
+                EventUser eventUser = new EventUser();
+                eventUser.setNotifyStrategy(notifyStrategyRepository.findById(eventDto.getNotificationStrategyId()).orElseThrow());
+                eventUser.setNextStage(Stage.CREATE);
+                eventUser.setUser(user);
+                eventUser.setEvent(event);
+                eventUser.setNotifyStrategy(notifyStrategyRepository.findById(1L).get());
+                eventUser.setNextNotify(time);
+                event.getEventUsers().add(eventUser);
+                eventUsers.add(eventUser);
+            }
+        }
+
         eventRepository.save(event);
         eventUserRepository.saveAll(eventUsers);
         System.out.println(event);

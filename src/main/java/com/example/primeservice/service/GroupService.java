@@ -59,6 +59,10 @@ public class GroupService {
         }
     }
 
+    public  List<UserGroup> getAllSlaveGroups(UserGroup userGroup){
+        return groupRepository.findAllSlaveGroups(userGroup.getId());
+    }
+
     public List<UserGroup> getAllGroupsByNames(List<String> names){
         List<UserGroup> groups = new ArrayList<>();
         for (String name: names) {

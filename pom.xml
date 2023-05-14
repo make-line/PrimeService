@@ -11,8 +11,8 @@
     <groupId>com.example</groupId>
     <artifactId>PrimeService</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>RegistrationService</name>
-    <description>RegistrationService</description>
+    <name>PrimeService</name>
+    <description>PrimeService</description>
     <properties>
         <java.version>19</java.version>
     </properties>
